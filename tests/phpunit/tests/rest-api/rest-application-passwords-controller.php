@@ -36,7 +36,7 @@ class WP_Test_REST_Application_Passwords_Controller extends WP_Test_REST_Control
 	 *
 	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
 	 */
-	public static function wpSetUpBeforeClass( $factory ) {
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
 		self::$subscriber_id = $factory->user->create(
 			array(
 				'role' => 'subscriber',
@@ -112,7 +112,7 @@ class WP_Test_REST_Application_Passwords_Controller extends WP_Test_REST_Control
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
 		$response = rest_do_request( '/wp/v2/users/me/application-passwords' );
-		$this->assertErrorResponse( 'application_passwords_disabled', $response, 500 );
+		$this->assertErrorResponse( 'application_passwords_disabled', $response, 501 );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class WP_Test_REST_Application_Passwords_Controller extends WP_Test_REST_Control
 		add_filter( 'wp_is_application_passwords_available_for_user', '__return_false' );
 
 		$response = rest_do_request( '/wp/v2/users/me/application-passwords' );
-		$this->assertErrorResponse( 'application_passwords_disabled_for_user', $response, 500 );
+		$this->assertErrorResponse( 'application_passwords_disabled_for_user', $response, 501 );
 	}
 
 	/**
@@ -402,6 +402,22 @@ class WP_Test_REST_Application_Passwords_Controller extends WP_Test_REST_Control
 		$request->set_body_params( array( 'name' => 'App' ) );
 		$response = rest_do_request( $request );
 		$this->assertErrorResponse( 'rest_user_invalid_id', $response, 404 );
+	}
+
+	/**
+	 * @ticket 51939
+	 */
+	public function test_create_item_records_app_passwords_in_use() {
+		wp_set_current_user( self::$admin );
+
+		$this->assertFalse( WP_Application_Passwords::is_in_use() );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/users/me/application-passwords' );
+		$request->set_body_params( array( 'name' => 'App' ) );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertTrue( WP_Application_Passwords::is_in_use() );
 	}
 
 	/**

@@ -19,7 +19,7 @@ class Tests_Auth extends WP_UnitTestCase {
 	 */
 	protected $nonce_failure_hook = 'wp_verify_nonce_failed';
 
-	public static function wpSetUpBeforeClass( $factory ) {
+	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ) {
 		self::$_user = $factory->user->create_and_get(
 			array(
 				'user_login' => 'password-tests',
@@ -37,6 +37,7 @@ class Tests_Auth extends WP_UnitTestCase {
 
 		$this->user = clone self::$_user;
 		wp_set_current_user( self::$user_id );
+		update_site_option( 'using_application_passwords', 1 );
 	}
 
 	public function tearDown() {
@@ -527,7 +528,7 @@ class Tests_Auth extends WP_UnitTestCase {
 
 		$error = wp_authenticate_application_password( null, self::$_user->user_login, 'password' );
 		$this->assertWPError( $error );
-		$this->assertSame( 'application_passwords_disabled', $error->get_error_code() );
+		$this->assertSame( 'application_passwords_disabled_for_user', $error->get_error_code() );
 	}
 
 	/**
@@ -603,5 +604,15 @@ class Tests_Auth extends WP_UnitTestCase {
 		$user = wp_authenticate_application_password( null, self::$_user->user_email, WP_Application_Passwords::chunk_password( $password ) );
 		$this->assertInstanceOf( WP_User::class, $user );
 		$this->assertSame( self::$user_id, $user->ID );
+	}
+
+	/**
+	 * @ticket 51939
+	 */
+	public function test_authenticate_application_password_returns_null_if_not_in_use() {
+		delete_site_option( 'using_application_passwords' );
+
+		$authenticated = wp_authenticate_application_password( null, 'idonotexist', 'password' );
+		$this->assertNull( $authenticated );
 	}
 }
