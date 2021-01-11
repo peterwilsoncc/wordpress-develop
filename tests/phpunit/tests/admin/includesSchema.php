@@ -79,7 +79,7 @@ class Tests_Admin_Includes_Schema extends WP_UnitTestCase {
 		$options  = self::$options;
 		$blogmeta = self::$blogmeta;
 		$sitemeta = self::$sitemeta;
-
+		// return;
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( "DROP TABLE IF EXISTS {$options}" );
 		$wpdb->query( "DROP TABLE IF EXISTS {$blogmeta}" );

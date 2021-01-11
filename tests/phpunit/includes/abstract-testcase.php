@@ -72,8 +72,10 @@ abstract class WP_UnitTestCase_Base extends PHPUnit\Framework\TestCase {
 		self::commit_transaction();
 		echo( 'setUpBeforeClass' . get_called_class() . "\n" );
 		self::start_transaction();
-
 		$class = get_called_class();
+		add_filter( 'query', array( $class, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $class, '_drop_temporary_tables' ) );
+
 
 		if ( method_exists( $class, 'wpSetUpBeforeClass' ) ) {
 			call_user_func( array( $class, 'wpSetUpBeforeClass' ), self::factory() );
@@ -142,6 +144,9 @@ abstract class WP_UnitTestCase_Base extends PHPUnit\Framework\TestCase {
 
 		// $this->start_transaction(); // create save point
 		$wpdb->query( 'SAVEPOINT wp_setup' );
+		$class = get_called_class();
+		add_filter( 'query', array( $class, '_create_temporary_tables' ) );
+		add_filter( 'query', array( $class, '_drop_temporary_tables' ) );
 		echo( 'setUp' . get_called_class() . "\n" );
 		$this->expectDeprecated();
 		add_filter( 'wp_die_handler', array( $this, 'get_wp_die_handler' ) );
@@ -420,7 +425,6 @@ abstract class WP_UnitTestCase_Base extends PHPUnit\Framework\TestCase {
 	 * @return string The altered query.
 	 */
 	public static function _create_temporary_tables( $query ) {
-		return $query;
 		if ( 0 === strpos( trim( $query ), 'CREATE TABLE' ) ) {
 			return substr_replace( trim( $query ), 'CREATE TEMPORARY TABLE', 0, 12 );
 		}
@@ -434,7 +438,6 @@ abstract class WP_UnitTestCase_Base extends PHPUnit\Framework\TestCase {
 	 * @return string The altered query.
 	 */
 	public static function _drop_temporary_tables( $query ) {
-		return $query;
 		if ( 0 === strpos( trim( $query ), 'DROP TABLE' ) ) {
 			return substr_replace( trim( $query ), 'DROP TEMPORARY TABLE', 0, 10 );
 		}
