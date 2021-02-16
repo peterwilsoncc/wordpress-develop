@@ -59,6 +59,10 @@ function wp_robots() {
 		return;
 	}
 
+	if ( ! headers_sent() ) {
+		header( 'X-Robots: ' . implode( ', ', $robots_strings ) );
+	}
+
 	echo "<meta name='robots' content='" . esc_attr( implode( ', ', $robots_strings ) ) . "' />\n";
 }
 
