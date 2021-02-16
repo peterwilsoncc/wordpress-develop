@@ -61,6 +61,7 @@ function wp_robots() {
 
 	if ( ! headers_sent() ) {
 		header( 'X-Robots: ' . implode( ', ', $robots_strings ) );
+		return;
 	}
 
 	echo "<meta name='robots' content='" . esc_attr( implode( ', ', $robots_strings ) ) . "' />\n";
