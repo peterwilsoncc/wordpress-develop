@@ -24,6 +24,8 @@ class Tests_Functions_wpGetNocacheHeaders extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Ensure nocache headers are as expected for logged out users.
+	 *
 	 * @ticket 54490
 	 */
 	public function test_wp_get_nocache_headers_for_logged_out_user() {
@@ -38,6 +40,8 @@ class Tests_Functions_wpGetNocacheHeaders extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Ensure nocache headers are as expected for logged in users.
+	 *
 	 * @ticket 21938
 	 * @ticket 54490
 	 */
@@ -55,6 +59,8 @@ class Tests_Functions_wpGetNocacheHeaders extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Ensure the `nocache_headers` filter works as expected.
+	 *
 	 * @ticket 54490
 	 */
 	public function test_filter_nocache_headers() {
