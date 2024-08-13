@@ -3,8 +3,12 @@ name: Pull Request Comments
 
 on:
   pull_request_target:
-    types: [ 'opened', 'reopened' ]
-
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - ready_for_review
 
 # Cancels all previous workflow runs for pull requests that have not completed.
 concurrency:
