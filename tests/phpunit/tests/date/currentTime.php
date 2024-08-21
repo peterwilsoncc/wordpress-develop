@@ -205,12 +205,12 @@ class Tests_Date_CurrentTime extends WP_UnitTestCase {
 	 */
 	public function data_partial_hour_timezones_with_timestamp() {
 		return array(
-			'+13:45' => array( 13.45 ), // New Zealand, Chatham Islands.
-			'+9:30'  => array( 9.5 ), // Australian Northern Territory.
-			'+05:30' => array( 5.5 ), // India and Sri Lanka.
-			'+05:45' => array( 5.45 ), // Nepal.
-			'-03:30' => array( -3.30 ), // Canada, Newfoundland.
-			'-09:30' => array( -9.30 ), // French Polynesia, Marquesas Islands.
+			'+12:45' => array( 12.75, 'Pacific/Chatham' ), // New Zealand, Chatham Islands.
+			'+9:30'  => array( 9.5, 'Australia/Darwin' ), // Australian Northern Territory.
+			'+05:30' => array( 5.5, 'Asia/Kolkata' ), // India and Sri Lanka.
+			'+05:45' => array( 5.75, 'Asia/Kathmandu' ), // Nepal.
+			'-03:30' => array( -3.50, 'Canada/Newfoundland' ), // Canada, Newfoundland.
+			'-09:30' => array( -9.50, 'Pacific/Marquesas' ), // French Polynesia, Marquesas Islands.
 		);
 	}
 }
