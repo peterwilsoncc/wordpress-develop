@@ -199,6 +199,38 @@ class Tests_Date_CurrentTime extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests the tests.
+	 *
+	 * This is to ensure the data provider offsets are correct.
+	 *
+	 * @ticket 57998
+	 *
+	 * @dataProvider data_partial_hour_timezones_with_timestamp
+	 *
+	 * @param float $partial_hour     Partial hour GMT offset to test.
+	 * @param string $timezone_string Timezone string to test.
+	 */
+	public function test_partial_hour_timezones_match_datetime_offset( $partial_hour, $timezone_string ) {
+		$timezone   = new DateTimeZone( $timezone_string );
+		$datetime   = new DateTime( 'now', $timezone );
+		$dst_offset = (int) $datetime->format( 'I' );
+
+		// Timezone offset in hours.
+		$offset = $timezone->getOffset( $datetime ) / HOUR_IN_SECONDS;
+
+		/*
+		 * Adjust for daylight saving time.
+		 *
+		 * DST adds an hour to the offset, the partial hour offset
+		 * is set the the standard time offset so this removes the
+		 * DST offset to avoid false negatives.
+		 */
+		$offset -= $dst_offset;
+
+		$this->assertSame( $partial_hour, $offset, 'The offset should match to timezone.' );
+	}
+
+	/**
 	 * Data provider.
 	 *
 	 * @return array
