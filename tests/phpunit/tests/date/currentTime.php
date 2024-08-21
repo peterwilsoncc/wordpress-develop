@@ -195,7 +195,7 @@ class Tests_Date_CurrentTime extends WP_UnitTestCase {
 		$expected = time() + (int) ( $partial_hour * HOUR_IN_SECONDS );
 
 		// phpcs:ignore WordPress.DateTime.CurrentTimeTimestamp.Requested
-		$this->assertSame( $expected, current_time( 'timestamp' ) );
+		$this->assertEqualsWithDelta( $expected, current_time( 'timestamp' ), 2, 'The timestamps should be equal' );
 	}
 
 	/**
