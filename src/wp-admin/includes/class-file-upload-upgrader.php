@@ -57,6 +57,8 @@ class File_Upload_Upgrader {
 			wp_die( __( 'Please select a file' ) );
 		}
 
+		$thing = 'thing';
+
 		// Handle a newly uploaded file. Else, assume it's already been uploaded.
 		if ( ! empty( $_FILES ) ) {
 			$overrides = array(
