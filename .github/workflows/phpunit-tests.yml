@@ -113,7 +113,7 @@ jobs:
     permissions:
       contents: read
     secrets: inherit
-    if: ${{ github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' }}
+    if: ${{ ( github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' ) && ( startsWith( github.base_ref, 'feature/' ) != true || vars.ALLOW_FEATURE_BRANCHES == 'true' ) }}
     strategy:
       fail-fast: false
       matrix:
@@ -163,7 +163,7 @@ jobs:
     permissions:
       contents: read
     secrets: inherit
-    if: ${{ github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' }}
+    if: ${{ ( github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' ) && ( startsWith( github.base_ref, 'feature/' ) != true || vars.ALLOW_FEATURE_BRANCHES == 'true' ) }}
     strategy:
       fail-fast: false
       matrix:
@@ -206,7 +206,7 @@ jobs:
     permissions:
       contents: read
     secrets: inherit
-    if: ${{ github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' }}
+    if: ${{ ( github.repository == 'WordPress/wordpress-develop' || github.event_name == 'pull_request' ) && ( startsWith( github.base_ref, 'feature/' ) != true || vars.ALLOW_FEATURE_BRANCHES == 'true' ) }}
     strategy:
       fail-fast: false
       matrix:
