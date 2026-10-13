@@ -65,6 +65,43 @@ class WP_Admin_Notice_Collector {
 			add_filter( 'admin_title', array( __CLASS__, 'add_title_placeholder' ), 10, 2 );
 			ob_start( array( __CLASS__, 'inject_notice_count' ) );
 		}
+		wp_register_script(
+			'wp-admin-notice-collector',
+			false,
+			array( 'wp-i18n' ),
+			false,
+			array( 'in_footer' => true )
+		);
+		wp_add_inline_script( 'wp-admin-notice-collector', self::inline_script() );
+		wp_enqueue_script( 'wp-admin-notice-collector' );
+	}
+
+	public static function inline_script(): string {
+		$script = <<<'JS'
+			(()=>{
+				const titleElement = document.querySelector( 'title' );
+				const originalTitle = titleElement.innerText;
+				let noticeCount = parseInt( titleElement.dataset.wpNoticeCount );
+				const originalNoticeText = wp.i18n.sprintf( wp.i18n._n( '(%d notice) ', '(%d notices) ', noticeCount ), noticeCount )
+
+				window.addEventListener( 'load', () => {
+					const dismissButtons = document.querySelectorAll( 'div.is-dismissible .notice-dismiss' );
+					console.log( dismissButtons );
+					dismissButtons.forEach( (el) => {
+						const listener = () => {
+							el.removeEventListener( 'click', listener );
+							--noticeCount;
+							const noticePrefix = noticeCount > 0 ? wp.i18n.sprintf( wp.i18n._n( '(%d notice) ', '(%d notices) ', noticeCount ), noticeCount ) : '';
+							let titleText = originalTitle;
+							titleText = titleText.replace( originalNoticeText, noticePrefix );
+							titleElement.innerText = titleText;
+						};
+						el.addEventListener( 'click', listener );
+					} );
+				} );
+			})();
+		JS;
+		return $script;
 	}
 
 	/**
@@ -159,6 +196,8 @@ class WP_Admin_Notice_Collector {
 
 		/* translators: %d: Number of admin notices on the current page. */
 		$prefix = sprintf( _n( '(%d notice) ', '(%d notices) ', $count ), $count );
+
+		$buffer = str_replace( '<title', "<title data-wp-notice-count='{$count}'", $buffer );
 
 		return str_replace( self::TITLE_PLACEHOLDER, $prefix, $buffer );
 	}
