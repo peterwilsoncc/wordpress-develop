@@ -9,13 +9,6 @@
 class Tests_WP_HandleRandom extends WP_UnitTestCase {
 
 	/**
-	 * Message of the exception thrown in place of the `exit` following a redirect.
-	 *
-	 * @var string
-	 */
-	const REDIRECT_EXCEPTION_MESSAGE = 'Random content redirect.';
-
-	/**
 	 * Redirect location captured from the `wp_redirect` filter.
 	 *
 	 * @var string|null
@@ -39,22 +32,20 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 
 		$this->redirect_location = null;
 
-		// Capture redirects and end the request before `exit` ends the test run.
+		// Capture redirects and prevent `exit` from ending the test run.
 		add_filter( 'wp_redirect', array( $this, 'filter_wp_redirect' ) );
 	}
 
 	/**
-	 * Captures the redirect and ends the request in place of the `exit` that follows it.
-	 *
-	 * @throws WP_Tests_Exception Always, caught by {@see self::handle_random()}.
+	 * Captures the redirect and prevents it from being sent.
 	 *
 	 * @param string $location Redirect location.
-	 * @return never
+	 * @return false
 	 */
 	public function filter_wp_redirect( string $location ) {
 		$this->redirect_location = $location;
 
-		throw new WP_Tests_Exception( self::REDIRECT_EXCEPTION_MESSAGE );
+		return false;
 	}
 
 	/**
@@ -64,25 +55,16 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 	 * cache or running the rest of WP::main().
 	 *
 	 * @param array<string, string> $query_vars Query variables for the request.
-	 * @return bool|null Whether the main query was run for a random content request,
-	 *                   or null if the request was redirected.
+	 * @return bool Whether the main query was run for a random content request.
 	 */
-	protected function handle_random( array $query_vars ): ?bool {
+	protected function handle_random( array $query_vars ): bool {
 		$GLOBALS['wp_the_query'] = new WP_Query();
 		$GLOBALS['wp_query']     = $GLOBALS['wp_the_query'];
 
 		$wp             = new WP();
 		$wp->query_vars = $query_vars;
 
-		try {
-			return $wp->handle_random();
-		} catch ( WP_Tests_Exception $e ) {
-			if ( self::REDIRECT_EXCEPTION_MESSAGE !== $e->getMessage() ) {
-				throw $e;
-			}
-
-			return null;
-		}
+		return $wp->handle_random();
 	}
 
 	/**
@@ -196,16 +178,15 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Ensure the request is redirected to the selected post's permalink, ending the request.
+	 * Ensure the request continues with the selected post when it cannot be redirected to.
 	 *
 	 * @ticket 64498
-	 * @ticket 66625
 	 *
-	 * @dataProvider data_permalinks
+	 * @dataProvider data_permalinks_that_cannot_be_redirected_to
 	 *
 	 * @param string $permalink Permalink of the selected post.
 	 */
-	public function test_request_is_redirected_to_the_permalink_of_the_selected_post( string $permalink ): void {
+	public function test_request_continues_with_the_selected_post_when_it_is_not_redirected( string $permalink ): void {
 		add_filter(
 			'post_link',
 			static function () use ( $permalink ): string {
@@ -215,19 +196,21 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 
 		$handled = $this->handle_random( array( 'random' => '' ) );
 
-		$this->assertNull( $handled, 'The request should end with the redirect.' );
-		$this->assertSame( $permalink, $this->redirect_location, 'The request should redirect to the permalink of the selected post.' );
+		$this->assertTrue( $handled, 'The main query should be reported as run.' );
+		$this->assertNull( $this->redirect_location, 'The request should not redirect.' );
+		$this->assertInstanceOf( WP_Post::class, $GLOBALS['wp_the_query']->post, 'The selected post should remain in the main query.' );
+		$this->assertFalse( is_404(), 'The request should not be set to a 404.' );
 	}
 
 	/**
-	 * Data provider for {@see self::test_request_is_redirected_to_the_permalink_of_the_selected_post()}.
+	 * Data provider for {@see self::test_request_continues_with_the_selected_post_when_it_is_not_redirected()}.
 	 *
-	 * @return array<non-falsy-string, array{ 0: non-falsy-string }>
+	 * @return array<non-falsy-string, array{ 0: string }>
 	 */
-	public static function data_permalinks(): array {
+	public static function data_permalinks_that_cannot_be_redirected_to(): array {
 		return array(
-			'permalink on this site'    => array( 'http://' . WP_TESTS_DOMAIN . '/post/' ),
-			'permalink on another site' => array( 'https://elsewhere.example/post/' ),
+			'empty permalink'    => array( '' ),
+			'off-site permalink' => array( 'https://elsewhere.example/post/' ),
 		);
 	}
 }
