@@ -196,8 +196,7 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Ensure the request is redirected to the selected post's permalink on the
-	 * `template_redirect` action, ending the request.
+	 * Ensure the request is redirected to the selected post's permalink, ending the request.
 	 *
 	 * @ticket 64498
 	 * @ticket 66625
@@ -216,16 +215,7 @@ class Tests_WP_HandleRandom extends WP_UnitTestCase {
 
 		$handled = $this->handle_random( array( 'random' => '' ) );
 
-		$this->assertTrue( $handled, 'The main query should be reported as run.' );
-		$this->assertNull( $this->redirect_location, 'The request should not redirect before the template_redirect action.' );
-
-		try {
-			do_action( 'template_redirect' );
-			$this->fail( 'The request should end with the redirect.' );
-		} catch ( WP_Tests_Exception $e ) {
-			$this->assertSame( self::REDIRECT_EXCEPTION_MESSAGE, $e->getMessage(), 'An unexpected exception was thrown.' );
-		}
-
+		$this->assertNull( $handled, 'The request should end with the redirect.' );
 		$this->assertSame( $permalink, $this->redirect_location, 'The request should redirect to the permalink of the selected post.' );
 	}
 
