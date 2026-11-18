@@ -703,9 +703,8 @@ function is_sitemap(): bool {
 /**
  * Determines whether the query is for random content.
  *
- * True for a blog home or archive request that includes the `random` query variable,
- * for example `example.com/random/` or `example.com/random/category/news/`. Search,
- * feed, trackback, robots.txt, favicon and sitemap requests are never for random content.
+ * True for a blog home, archive or search request that includes the `random` query
+ * variable, for example `example.com/random/` or `example.com/random/category/news/`.
  *
  * @since 7.2.0
  *
@@ -1288,17 +1287,13 @@ function wp_is_random_content_redirect_enabled(): bool {
 /**
  * Determines whether a query is a request for random content.
  *
- * A random content request is a front end, main query for the blog home or an archive
- * that includes the `random` query variable and at least one `randomable` post type.
- * For example `example.com/random/` or `example.com/random/category/news/`.
+ * A random content request is a front end, main query for the blog home, an archive,
+ * or search results that includes the `random` query variable and at least one
+ * `randomable` post type. For example
+ * `example.com/random/`, `example.com/random/category/news/` or `example.com/?s=foo&random`.
  *
- * Singular (including embeds), search, feed, trackback, robots.txt, favicon and sitemap
- * requests are never random content requests, nor are requests using an HTTP method
- * other than GET or HEAD. Search
- * requests are excluded as selecting a random post from search results would run an
- * uncacheable search query that orders every matching post randomly. Search requests
- * that include the `random` query variable are redirected to the search results
- * by {@see WP::handle_random()}.
+ * Singular (including embeds) and feed requests are never random content requests,
+ * nor are requests using an HTTP method other than GET or HEAD.
  *
  * @since 7.2.0
  *
