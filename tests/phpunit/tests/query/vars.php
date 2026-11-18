@@ -67,7 +67,6 @@ class Tests_Query_Vars extends WP_UnitTestCase {
 				'cpage',
 				'post_type',
 				'embed',
-				'random',
 
 				// Dynamically added public query vars:
 				'post_format',
